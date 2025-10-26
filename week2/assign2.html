@@ -1,0 +1,240 @@
+<!-- 作業一 -->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>work-1 作業一</title>
+</head>
+<body>
+    <script>
+    const positions = {  // 角色定義座標
+    "悟空": [0, 0],
+    "丁滿":[-1, 4],
+    "辛巴":[-3, 3],
+    "貝吉塔":[-4, -1],
+    "弗利沙":[4, -1],
+    "特南克斯":[1, -2],
+
+}
+
+// 斜線 假設 y=-x+2
+const LINE_A = 1.0
+const LINE_B = 1.0
+const LINE_C = -2.0
+
+// 一元二次方程式假設，假設在同側(same_side): ax+by+c = 0
+function same_side(p1, p2, a, b, c){
+    const v1=a*p1[0]+b*p1[1]+c ;
+    const v2=a*p2[0]+b*p2[1]+c ;
+    if (v1=== 0 || v2 === 0)
+        return true ;
+    return v1*v2>0 ; // 同號(負負得正 or 正正得正 皆>0)表示在同一側
+}
+    
+    
+
+function cross_line(p1, p2, a, b, c, cheat=2){
+    const dx= Math.abs(p1[0] - p2[0]);
+    const dy= Math.abs(p2[1] - p2[1]);
+    let cor = dx + dy;  // 同側則回傳 cor
+    if (!same_side) cor += cheat; // 不同側代表有跨越 要+2(cheat)
+        return cor
+}
+
+function func1(name){
+    if (!(name in positions)) {
+        console.log(" 角色不存在 ")
+        return
+    }
+    const target = positions[name];
+    const dists = {};
+
+    for(const [other, pos] of Object.entries(positions))  {
+        if (other === name) continue;
+        const  d = cross_line(target, pos, LINE_A, LINE_B, LINE_C , 2);
+        dists[ other ] = d;
+    }
+    const distances= Object.values(dists);
+    const min_d = Math.min(...distances);
+    const max_d = Math.max(...distances);
+
+    const nearest = Object.keys(dists). filter(k=> dists[k] === min_d);
+    const farthest = Object.keys(dists). filter(k=> dists[k] === max_d)
+
+    console.log( `最遠${farthest.join("、")} ; 最近${nearest.join("、")}`);
+    
+}
+    
+func1("辛巴");
+func1("悟空");
+func1("弗利沙");
+func1("特南克斯");
+        
+
+    </script>
+</body>
+</html>
+
+
+<!-- 作業二 -->
+
+ <!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>work-2 作業二</title>
+</head>
+<body>
+    <script>
+        const services = [
+            { name: "S1", r: 4.5, c: 1000 },
+            { name: "S2", r: 3, c: 1200},
+            { name: "S3", r: 3.8, c: 800}
+        ];
+
+        function func2(ss, start, end, criteria) {
+            if (!func2.schedule) {
+                func2.schedule = {};
+                ss.forEach(s => func2.schedule[s.name] = []);
+            }
+
+            let field = null, op = null, value = null;
+            for(const o of ["<=", ">=", "="]) {
+                if (criteria. includes(o)) {
+                    [field, value ] = criteria.split(o);
+                    op = o ;
+                    field = field.trim();
+                    value = value.trim();
+                    break;
+                }
+            }
+        
+
+            const available = [];
+        
+            for(const s of ss) {
+                const conflict = func2.schedule[s.name].some(([st, et]) => !(end <= st || start >= et));
+                if (conflict) continue;
+
+                if(field === "name") {
+                    if(op === "=" && s.name === value) {
+                        available.push(s);
+                    }
+                } else {
+                  const val = parseFloat(value);
+                  if (op === ">=" && s[field] >= val) {
+                    available.push(s);
+                  } else if (op === "<=" && s[field] <= val) {
+                    available.push(s);
+                  } else if (op === "=" && s[field] === val) {
+                    available.push(s);
+                  }
+                }
+            }
+
+            if  (available.length === 0) {
+                console.log("Sorry");
+                return;
+            }
+
+            let chosen = null;
+            if (field !=="name") {
+                const val = parseFloat(value);
+                chosen = available.reduce((a, b) => Math.abs(a[field] - val) < Math.abs(b[field] - val) ? a:b);
+            } else {
+                chosen = available[0];
+            }
+
+            func2.schedule[chosen.name].push ([start, end]);
+            console.log(chosen.name);
+         }
+
+    func2(services, 15, 17, "c>=800" )
+    func2(services, 11, 13, "r<=4" )
+    func2(services, 10, 12, "name=S3" )
+    func2(services, 15, 18, "r>=4.5" )
+    func2(services, 16, 18, "r>=4" )
+    func2(services, 13, 17, "name=S1" )
+    func2(services, 8, 9, "c<=1500" )
+
+
+    </script>
+</body>
+</html>
+
+
+<!-- 作業三 -->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>作業三</title>
+</head>
+<body>
+    <script>
+        function func3(index){
+            const y=[-2, -3, +1, +2];
+            let n=25
+            for(let x=1 ; x<=index ; x++ ){  // x++= (x=x+1)
+                z = y[( x - 1 ) % 4]  
+                n= n + z
+            }
+            console.log(n)
+        }
+
+        func3(1)
+        func3(5)
+        func3(10)
+        func3(30)
+
+    </script>
+    
+</body>
+</html>
+
+
+<!-- 作業四 -->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>work-4 作業四</title>
+</head>
+<body>
+    <script>
+        function func4(sp, stat, n){
+            let candidates=[];
+            for(let i=0; i< sp.length; i++){
+                if (stat[i] === '0') {
+                    candidates.push([i, sp[i]]);
+                } //只看可服務的車廂
+            }         
+        
+    
+            let enough = candidates.filter(([i, s]) => s >= n);
+
+            let idx;
+            if (enough.length > 0) {
+                idx = enough.reduce((a,b) => (a[1] <= b[1]? a:b))[0];
+            //   選座位數最小的那一個
+            } else {
+                idx = candidates.reduce((a,b) => (a[1] >= b[1] ? a:b))[0];
+                //  選座位數最小的那一個(剛好夠)
+            }
+
+            return idx;
+        }   
+console.log (func4([3, 1, 5, 4, 3, 2], "101000", 2))
+console.log (func4([1, 0, 5, 1, 3], "10100", 2))
+console.log (func4([4, 6, 5, 8], "1000", 4))
+    
+    </script>
+</body>
+</html>
