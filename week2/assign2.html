@@ -19,53 +19,62 @@
 
 }
 
-// 斜線 假設 y=-x+2
-const LINE_A = 1.0
-const LINE_B = 1.0
-const LINE_C = -2.0
+// 定義斜線: y=-x+2
+const P1 = [-4, 6]  // 在線的左上
+const P2 = [6, -4]  // 在線的右下
 
-// 一元二次方程式假設，假設在同側(same_side): ax+by+c = 0
-function same_side(p1, p2, a, b, c){
-    const v1=a*p1[0]+b*p1[1]+c ;
-    const v2=a*p2[0]+b*p2[1]+c ;
-    if (v1=== 0 || v2 === 0)
-        return true ;
-    return v1*v2>0 ; // 同號(負負得正 or 正正得正 皆>0)表示在同一側
+
+// 先判斷在線的哪一側(兩點式)
+function lineSide(p){
+    const [x, y] = p ;
+    const [x1, y1] = P1 ;
+    const [x2, y2] = P2 ;
+    return (y2-y1)*(x-x1)-(x2-x1)*(y-y1);
 }
     
     
-
-function cross_line(p1, p2, a, b, c, cheat=2){
-    const dx= Math.abs(p1[0] - p2[0]);
-    const dy= Math.abs(p2[1] - p2[1]);
-    let cor = dx + dy;  // 同側則回傳 cor
-    if (!same_side) cor += cheat; // 不同側代表有跨越 要+2(cheat)
-        return cor
+// 判斷是否跨越邊界線
+function isCrossLine(p1, p2){
+    return lineSide(p1)*lineSide(p2)<0
 }
 
+// 計算曼哈頓距離( 若有跨越則+2 )
+function calcDistance(p1, p2){
+    const dx= Math.abs(p1[0]-p2[0]);
+    const dy= Math.abs(p1[1]-p2[1]);
+    let d =dx+dy;
+    if(isCrossLine(p1, p2)){
+        d+=2;
+    }
+    return d;
+}
+
+// 主函式:找最遠、最近
 function func1(name){
-    if (!(name in positions)) {
-        console.log(" 角色不存在 ")
-        return
+    if(!positions[name]) {
+        console.log("角色不存在");
+        return;
     }
-    const target = positions[name];
-    const dists = {};
 
-    for(const [other, pos] of Object.entries(positions))  {
-        if (other === name) continue;
-        const  d = cross_line(target, pos, LINE_A, LINE_B, LINE_C , 2);
-        dists[ other ] = d;
-    }
-    const distances= Object.values(dists);
-    const min_d = Math.min(...distances);
-    const max_d = Math.max(...distances);
+const target=positions[name];
+const dists={};
 
-    const nearest = Object.keys(dists). filter(k=> dists[k] === min_d);
-    const farthest = Object.keys(dists). filter(k=> dists[k] === max_d)
+for (const[other, pos] of Object.entries(positions)) {
+    if(other===name) continue;
+    dists[other]=calcDistance(target, pos);
+}
 
-    console.log( `最遠${farthest.join("、")} ; 最近${nearest.join("、")}`);
+const values=Object.values(dists);
+const min=Math.min(...values);
+const max=Math.max(...values);
+
+const nearest = Object.keys(dists).filter(k => dists[k] === min);
+const farthest =Object.keys(dists).filter(k => dists[k] === max);
+
+console.log( `最遠${farthest.join("、")} ; 最近${nearest.join("、")}`);
     
 }
+
     
 func1("辛巴");
 func1("悟空");

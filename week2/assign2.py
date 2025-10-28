@@ -10,35 +10,36 @@ positions = {
 
 }
 
-# 斜線 假設 y=-x+2
-LINE_A, LINE_B, LINE_C = 1.0, 1.0, -2.0
+# 定義那條斜線：y = -x + 2
+P1 = (-4, 6)  # 線左上端
+P2 = (6, -4)  # 線右下端
 
-# # 設定邊界
-# X_MIN, X_MAX = -4, 4
-# Y_MIN, Y_MAX = -2, 4
+def line_side(p):
+    """判斷點在線的哪一側（使用兩點式公式）"""
+    x, y = p
+    x1, y1 = P1
+    x2, y2 = P2
+    return (y2 - y1) * (x - x1) - (x2 - x1) * (y - y1)
 
-def same_side(p1, p2, a, b, c):
-    v1=a+p1[0]+b*p1[1]+c
-    v2=a+p2[0]+b*p2[1]+c
-    if v1==0 or v2==0:
-        return True
-    return v1*v2>0 #同號表示在同一側
+def is_cross_line(p1, p2):
+    """若兩點在線的兩側，則跨越"""
+    s1 = line_side(p1)
+    s2 = line_side(p2)
+    return s1 * s2 < 0
 
-def cross_line(p1, p2, a, b, c, cheat=2):
-    dx= abs(p1[0] - p2[0])
-    dy= abs(p2[0] - p2[0])
-    cor = dx + dy # 同側則回傳 cor
-    if same_side:
-        return cor
-    else:
-        return cor + cheat # 不同側代表有跨越 要+2(cheat)
-
+def calc_distance(p1, p2):
+    """計算曼哈頓距離，若跨越邊界 +2"""
+    dx = abs(p1[0] - p2[0])
+    dy = abs(p1[1] - p2[1])
+    d = dx + dy
+    if is_cross_line(p1, p2):
+        d += 2
+    return d
 
 def func1(name):
     if name not in positions:
         print("角色不存在")
         return
-    
 
     target = positions[name]
     dists = {}
@@ -46,21 +47,22 @@ def func1(name):
     for other, pos in positions.items():
         if other == name:
             continue
-        d = cross_line(target, pos, LINE_A, LINE_B, LINE_C , cheat=2)
-        dists[ other ] = d
+        d = calc_distance(target, pos)
+        dists[other] = d
 
     min_d = min(dists.values())
     max_d = max(dists.values())
 
-    nearest = sorted([n for n, d in dists.items() if d == min_d])
-    farthest = sorted([n for n, d in dists.items() if d == max_d])
+    nearest = [k for k, v in dists.items() if v == min_d]
+    farthest = [k for k, v in dists.items() if v == max_d]
 
-    print(f"最遠{'、 '.join(farthest)} ; 最近{'、 '.join(nearest)} ")
+    print(f" 最遠{'、 '.join(farthest)} ; 最近{'、 '.join(nearest)} ")
 
 func1("辛巴")
 func1("悟空")
 func1("弗利沙")
 func1("特南克斯")
+
 
 
 # 作業二:一對一服務設置
